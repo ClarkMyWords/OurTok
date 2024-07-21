@@ -54,7 +54,8 @@ async def on_message(msg):
 
     if len(reply_content) > 0:
         for reply in reply_content:
-            await msg.reply(file=discord.File(reply))
+            async with msg.channel.typing():
+                await msg.reply(file=discord.File(reply))
             try:
                 os.remove(reply)
             except Exception as e:
