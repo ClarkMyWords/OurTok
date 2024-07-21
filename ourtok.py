@@ -2,7 +2,6 @@ from __future__ import annotations
 import discord
 from discord.ext import commands
 import asyncio
-from typing import TextIO
 import yt_dlp
 import logging
 import os
@@ -11,20 +10,19 @@ from urllib.parse import urlparse
 
 def from_url(url):
     ydl_format_options = {
-        'format': 'bestaudio/best',
-        'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
-        'restrictfilenames': True,
-        'noplaylist': True,
-        'nocheckcertificate': True,
-        'ignoreerrors': False,
-        'logtostderr': False,
-        'quiet': True,
-        'no_warnings': True,
-        'default_search': 'auto',
-        'source_address': '0.0.0.0',  # bind to ipv4 since ipv6 addresses cause issues sometimes
+        "format": "bestaudio/best",
+        "outtmpl": "%(extractor)s-%(id)s-%(title)s.%(ext)s",
+        "restrictfilenames": True,
+        "noplaylist": True,
+        "nocheckcertificate": True,
+        "ignoreerrors": False,
+        "logtostderr": False,
+        "quiet": True,
+        "no_warnings": True,
+        "default_search": "auto",
+        "source_address": "0.0.0.0",  # bind to ipv4 since ipv6 addresses cause issues sometimes
     }
     with yt_dlp.YoutubeDL(ydl_format_options) as ydl:
-
         info = ydl.extract_info(url)
         file = info["requested_downloads"][0]["filepath"]
 
@@ -60,9 +58,8 @@ async def on_message(msg):
             try:
                 os.remove(reply)
             except Exception as e:
-                print(f"Error removing file {f}:")
+                print(f"Error removing file {reply}:")
                 print(f"{e}\n")
-
 
 
 async def main():
