@@ -55,7 +55,14 @@ async def on_message(msg):
     if len(reply_content) > 0:
         for reply in reply_content:
             async with msg.channel.typing():
-                await msg.reply(file=discord.File(reply))
+                try:
+                    await msg.reply(file=discord.File(reply))
+                except discord.errors.HTTPException as e:
+                    if e.status == 413 and e.code == 40005:
+                        await msg.reply("Sorry, that file is too big for Discord (>25 MB)")
+                    else:
+                        await msg.reply(f"Sorry, An error occurred. ({e})")
+
             try:
                 os.remove(reply)
             except Exception as e:
