@@ -4,8 +4,9 @@ from discord.ext import commands
 import asyncio
 import yt_dlp
 import logging
-import os
+import pathlib
 from urllib.parse import urlparse
+from nptr_cli import NullPointer
 
 
 def from_url(url):
@@ -26,7 +27,7 @@ def from_url(url):
         info = ydl.extract_info(url)
         file = info["requested_downloads"][0]["filepath"]
 
-    return file
+    return pathlib.Path(file)
 
 
 intents = discord.Intents.default()
@@ -44,30 +45,43 @@ async def on_ready():
 
 @bot.event
 async def on_message(msg):
-    reply_content = []
-    msg_parts = msg.content.split()
-    for part in msg_parts:
-        parsed = urlparse(part)
-        if parsed.scheme != "":
-            if "tiktok" in parsed.netloc and parsed.path != "":
-                reply_content.append(from_url(part))
+    final_files = []
+    async with msg.channel.typing():
+        reply_content = []
+        msg_parts = msg.content.split()
+        for part in msg_parts:
+            parsed = urlparse(part)
+            if parsed.scheme != "":
+                if "tiktok" in parsed.netloc and parsed.path != "":
+                    reply_content.append(from_url(part))
 
-    if len(reply_content) > 0:
-        for reply in reply_content:
-            async with msg.channel.typing():
-                try:
-                    await msg.reply(file=discord.File(reply))
-                except discord.errors.HTTPException as e:
-                    if e.status == 413 and e.code == 40005:
-                        await msg.reply("Sorry, that file is too big for Discord (>25 MB)")
-                    else:
+        if len(reply_content) > 0:
+            for reply in reply_content:
+                if reply.stat().st_size <= (25 * (1024**2)):
+                    try:
+                        await msg.reply(file=discord.File(reply))
+                    except discord.errors.HTTPException as e:
                         await msg.reply(f"Sorry, An error occurred. ({e})")
 
-            try:
-                os.remove(reply)
-            except Exception as e:
-                print(f"Error removing file {reply}:")
-                print(f"{e}\n")
+                else:
+                    null_ptr = NullPointer()
+                    with open(reply, "rb") as fp:
+                        reply_data = fp.read()
+
+                    resp = null_ptr.upload(reply_data, reply.name)
+                    resp_url = resp["url"]
+                    await msg.reply(
+                        f"File too large for Discord, hosted for one month on https://0x0.st: {resp_url}"
+                    )
+
+                final_files.append(reply)
+
+    for f in final_files:
+        try:
+            f.unlink()
+        except Exception as e:
+            print(f"Error removing file {f}:")
+            print(f"{e}\n")
 
 
 async def main():
