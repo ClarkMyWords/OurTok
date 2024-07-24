@@ -45,17 +45,16 @@ async def on_ready():
 
 @bot.event
 async def on_message(msg):
-    final_files = []
-    async with msg.channel.typing():
-        reply_content = []
-        msg_parts = msg.content.split()
-        for part in msg_parts:
-            parsed = urlparse(part)
-            if parsed.scheme != "":
-                if "tiktok" in parsed.netloc and parsed.path != "":
-                    reply_content.append(from_url(part))
+    reply_content = []
+    msg_parts = msg.content.split()
+    for part in msg_parts:
+        parsed = urlparse(part)
+        if parsed.scheme != "":
+            if "tiktok" in parsed.netloc and parsed.path != "":
+                reply_content.append(from_url(part))
 
-        if len(reply_content) > 0:
+    if len(reply_content) > 0:
+        async with msg.channel.typing():
             for reply in reply_content:
                 if reply.stat().st_size <= (25 * (1024**2)):
                     try:
@@ -74,14 +73,11 @@ async def on_message(msg):
                         f"File too large for Discord, hosted for one month on https://0x0.st: {resp_url}"
                     )
 
-                final_files.append(reply)
-
-    for f in final_files:
-        try:
-            f.unlink()
-        except Exception as e:
-            print(f"Error removing file {f}:")
-            print(f"{e}\n")
+                try:
+                    reply.unlink()
+                except Exception as e:
+                    print(f"Error removing file {reply}:")
+                    print(f"{e}\n")
 
 
 async def main():
