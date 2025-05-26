@@ -6,7 +6,7 @@ import yt_dlp
 import logging
 import pathlib
 from urllib.parse import urlparse
-from nptr_cli import NullPointer
+#from nptr_cli import NullPointer
 
 
 def from_url(url):
@@ -63,15 +63,16 @@ async def on_message(msg):
                         await msg.reply(f"Sorry, An error occurred. ({e})")
 
                 else:
-                    null_ptr = NullPointer()
-                    with open(reply, "rb") as fp:
-                        reply_data = fp.read()
+                    await msg.reply(f"File too large for Discord. I got IP Banned from NullPtr, so not much else to be done...")
+                    #null_ptr = NullPointer()
+                    #with open(reply, "rb") as fp:
+                    #    reply_data = fp.read()
 
-                    resp = null_ptr.upload(reply_data, reply.name)
-                    resp_url = resp["url"]
-                    await msg.reply(
-                        f"File too large for Discord, hosted for one month on https://0x0.st: {resp_url}"
-                    )
+                    #resp = null_ptr.upload(reply_data, reply.name)
+                    #resp_url = resp["url"]
+                    #await msg.reply(
+                    #    f"File too large for Discord, hosted for one month on https://0x0.st: {resp_url}"
+                    #)
 
                 try:
                     reply.unlink()
