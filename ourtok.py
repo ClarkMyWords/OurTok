@@ -12,7 +12,7 @@ from urllib.parse import urlparse
 def from_url(url):
     ydl_format_options = {
         "format": "bestaudio/best",
-        "outtmpl": "%(extractor)s-%(id)s-%(title)s.%(ext)s",
+        "outtmpl": "tmp.%(ext)s",
         "restrictfilenames": True,
         "noplaylist": True,
         "nocheckcertificate": True,
